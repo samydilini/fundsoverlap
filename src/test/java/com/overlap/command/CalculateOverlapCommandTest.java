@@ -25,7 +25,7 @@ class CalculateOverlapCommandTest {
     @Mock
     private FundService fundService;
     @InjectMocks
-    CalculateOverlapCommand calculateOverlapCommand;
+    private CalculateOverlapCommand calculateOverlapCommand;
 
     private static final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 

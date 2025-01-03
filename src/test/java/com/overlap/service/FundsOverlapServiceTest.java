@@ -54,8 +54,8 @@ class FundsOverlapServiceTest {
     }
 
     @Test
-    void nullInputShouldNotInvokeLogic() {
-        List<String> lines = Collections.singletonList(null);
+    void emptyTokensShouldNotInvokeLogic() {
+        List<String> lines = Collections.singletonList(" ");
 
         assertDoesNotThrow(() -> fundsOverlapService.process(lines));
         verifyZeroInteractions(commandRegistryService);

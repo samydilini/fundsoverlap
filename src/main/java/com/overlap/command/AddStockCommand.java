@@ -7,16 +7,17 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Command to handle adding stocks to a given fund
+ * Command to handle adding stocks to a given fund.
  */
 public class AddStockCommand implements InputCommand {
 
     /**
-     * Is used to execute add command. will print out FUND_NOT_FOUND if the fund is not in the available funds list.
+     * Executes the add stock command. If the fund is not found in the available funds list,
+     * it prints out "FUND_NOT_FOUND".
      *
-     * @param tokens      this will have the fund and the stock name
-     * @param fundSession The current session information.
-     * @return will return the updated session
+     * @param tokens      A list of strings where the first element is the fund name and the second element is the stock name.
+     * @param fundSession The current session information containing available funds.
+     * @return The updated FundSession after attempting to add the stock.
      */
     @Override
     public FundSession execute(List<String> tokens, FundSession fundSession) {

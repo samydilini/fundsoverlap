@@ -11,9 +11,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This service is used to handle direct fund changes.
@@ -22,15 +22,31 @@ public class FundService {
     private final FundsMapper fundsMapper;
     private final Configurations configurations;
 
+    /**
+     * Default constructor initializing FundsMapper and Configurations.
+     */
     public FundService() {
         this.fundsMapper = new FundsMapper();
         this.configurations = new Configurations();
     }
 
     /**
-     * retrives funds from the get endpoint
+     * Constructs a FundService with the provided FundsMapper and Configurations.
+     * Used for unit tests.
+     *
+     * @param fundsMapper    the funds mapper to be used by this service
+     * @param configurations the configurations to be used by this service
+     */
+    public FundService(FundsMapper fundsMapper, Configurations configurations) {
+        this.fundsMapper = fundsMapper;
+        this.configurations = configurations;
+    }
+
+    /**
+     * Retrieves funds from the GET endpoint.
+     *
      * @return the list of funds retrieved
-     * @throws FundsOverlapException
+     * @throws FundsOverlapException if there is an error retrieving the funds
      */
     public List<Fund> get() throws FundsOverlapException {
 
@@ -41,16 +57,10 @@ public class FundService {
 
             // only process if the code is 200
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuilder response = new StringBuilder();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    String response = in.lines().collect(Collectors.joining());
+                    return fundsMapper.map(response);
                 }
-                in.close();
-
-                return fundsMapper.map(response.toString());
             } else {
                 String errorMessage = "Error: GET request not successful.";
                 System.out.println(errorMessage);
@@ -65,14 +75,15 @@ public class FundService {
     }
 
     /**
-     * Finds commands matching given inputs
+     * Finds commands matching given inputs.
+     *
      * @param commandFunds funds to be searched
-     * @param fundSession session containing current available funds
+     * @param fundSession  session containing current available funds
      * @return funds matching the search
-     * @throws FundsOverlapException
+     * @throws FundsOverlapException if there is an error finding the funds
      */
     public List<Fund> findFunds(List<String> commandFunds, FundSession fundSession) throws FundsOverlapException {
-        if(fundSession.getAvailableFunds().isEmpty()) {
+        if (fundSession.getAvailableFunds().isEmpty()) {
             List<Fund> availableFundsResponse = get();
             if (availableFundsResponse.isEmpty()) {
                 String message = "Error: No funds were found in stock data";
@@ -81,16 +92,14 @@ public class FundService {
             }
             fundSession.setAvailableFunds(availableFundsResponse);
         }
-        ArrayList<Fund> funds = new ArrayList<>();
-        for (String commandFund : commandFunds) {
-            Optional<Fund> availableFund = fundSession.getAvailableFunds().stream().filter(fund -> fund.getName().equals(commandFund)).findAny();
 
-            if(!availableFund.isPresent()) {
-                return new ArrayList<>();
-            }
-            funds.add(availableFund.get());
-        }
-        return funds;
+        return commandFunds.stream()
+                .map(commandFund -> fundSession.getAvailableFunds().stream()
+                        .filter(fund -> fund.getName().equals(commandFund))
+                        .findAny())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
 }

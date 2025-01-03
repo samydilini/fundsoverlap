@@ -64,7 +64,7 @@ class FundServiceTest {
     }
 
     @Test
-    public void ThrowsErrorIfConnectionIsNotSuccessful() throws IOException {
+    public void throwsErrorIfConnectionIsNotSuccessful() throws IOException {
         HttpURLConnection mockConnection = mock(HttpURLConnection.class);
         when(configurations.getHttpURLConnection()).thenReturn(mockConnection);
         when(mockConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
@@ -81,7 +81,27 @@ class FundServiceTest {
     }
 
     @Test
-    public void ThrowsErrorIfMappingIsNotSuccessful() throws IOException, FundsMappingException {
+    public void throwsErrorIfInputStreamFetchThrowsError() throws IOException {
+        HttpURLConnection mockConnection = mock(HttpURLConnection.class);
+
+        when(configurations.getHttpURLConnection()).thenReturn(mockConnection);
+        when(mockConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+
+        doThrow(new IOException("IO exception")).when(mockConnection).getInputStream();
+
+        try {
+            fundService.get();
+        } catch (FundsOverlapException e) {
+            assertEquals("Error: Error retrieving available funds. IO exception", e.getMessage());
+        }
+        assertEquals("Error: Error retrieving available funds. IO exception",
+                outContent.toString().replace("\n", "")
+                        .replace("\r", ""));
+
+    }
+
+    @Test
+    public void throwsErrorIfMappingIsNotSuccessful() throws IOException, FundsMappingException {
         HttpURLConnection mockConnection = mock(HttpURLConnection.class);
 
         when(configurations.getHttpURLConnection()).thenReturn(mockConnection);

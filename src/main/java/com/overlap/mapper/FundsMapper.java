@@ -10,24 +10,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mapping Json values to a list of funds
+ * Mapping Json values to a list of funds.
  */
 public class FundsMapper {
 
+    /**
+     * Maps a JSON response to a list of Fund objects.
+     *
+     * @param response the JSON response as a String
+     * @return a list of Fund objects
+     * @throws IOException           if an I/O exception occurs
+     * @throws FundsMappingException if a mapping exception occurs
+     */
     public List<Fund> map(String response) throws IOException, FundsMappingException {
         ObjectMapper objectMapper = new ObjectMapper();
-
         List<Fund> fundsList = new ArrayList<>();
+
         try {
-            JsonNode rootNode = objectMapper.readTree(response);
-            JsonNode fundsNode = rootNode.get("funds");
+            JsonNode fundsNode = objectMapper.readTree(response).get("funds");
             if (fundsNode != null && fundsNode.isArray()) {
                 for (JsonNode fundNode : fundsNode) {
-                    String name = fundNode.get("name").asText();
-                    Fund fund = new Fund(name);
-
-                    JsonNode stocksNode = fundNode.get("stocks");
+                    Fund fund = new Fund(fundNode.get("name").asText());
                     List<String> stocks = new ArrayList<>();
+                    JsonNode stocksNode = fundNode.get("stocks");
                     if (stocksNode != null && stocksNode.isArray()) {
                         for (JsonNode stockNode : stocksNode) {
                             stocks.add(stockNode.asText());
@@ -38,11 +43,8 @@ public class FundsMapper {
                 }
             }
         } catch (Exception e) {
-            String errorMessage = "Exception when Mapping.";
-            System.out.println(errorMessage + e.getMessage());
-            throw new FundsMappingException(errorMessage);
+            throw new FundsMappingException("Exception when Mapping.");
         }
         return fundsList;
-
     }
 }
