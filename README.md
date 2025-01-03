@@ -24,7 +24,10 @@ Overlap percentages are rounded to two decimal places.
 
 Run the following command to clean and build the project:
 
-./gradlew clean build
+`./gradlew clean build`
+or
+`gradlew clean build`
+depending on your system
 
 ### Execute
 
@@ -37,6 +40,16 @@ Examples:
 `java -jar build/libs/geektrust.jar src/main/resources/input1.txt`
 
 `java -jar build/libs/geektrust.jar src/main/resources/input2.txt`
+
+### Run unit tests  
+
+`./gradlew clean test`
+or 
+`gradle clean test`
+if you are using intelij then you can got to gradle -> Tasks -> build -> build (this will give build run tests and create the jacoco report)
+Jacoco report can be found in /build/reports/tests/test/index.html
+
+-----------------------------------------------------
 
 ## Conclusion
 
