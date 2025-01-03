@@ -93,4 +93,30 @@ class CalculateOverlapCommandTest {
                         .replace("\r", ""));
         verify(fundService).findFunds(commandFunds, fundSession);
     }
+
+    @Test
+    void printNothingWhenOverlapIsZero() throws FundsOverlapException {
+        List<String> commandFunds = Collections.singletonList("fund3");
+        List<Fund> portfolioFunds = new ArrayList<>();
+        Fund fund1 = new Fund("fund1");
+        fund1.addStock("stock1");
+        Fund fund2 = new Fund("fund2");
+        fund2.addStock("stock2");
+        portfolioFunds.add(fund1);
+        portfolioFunds.add(fund2);
+        List<Fund> availableFunds = new ArrayList<>();
+        availableFunds.add(fund1);
+        availableFunds.add(fund2);
+        availableFunds.add(new Fund("fund3"));
+        availableFunds.add(new Fund("fund4"));
+
+        FundSession fundSession = new FundSession(portfolioFunds, availableFunds);
+        when(fundService.findFunds(commandFunds, fundSession)).thenReturn(Collections.singletonList(new Fund("fund3")));
+
+        FundSession responseFundSession = calculateOverlapCommand.execute(commandFunds, fundSession);
+
+        assertSame(fundSession, responseFundSession);
+        assertEquals("", outContent.toString().replace("\n", "").replace("\r", ""));
+        verify(fundService).findFunds(commandFunds, fundSession);
+    }
 }

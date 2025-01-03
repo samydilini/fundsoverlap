@@ -45,7 +45,8 @@ public class CalculateOverlapCommand implements InputCommand {
             Fund fundToCheck = fundsToCheck.get(0);
             fundSession.getPortfolioFunds().forEach(fund -> {
                 double percentage = calculateOverlapPercentage(fundToCheck, fund);
-                System.out.println(fundToCheck.getName() + " " + fund.getName() + " " + String.format("%.2f", percentage) + "%");
+                if (percentage > 0)
+                    System.out.println(fundToCheck.getName() + " " + fund.getName() + " " + String.format("%.2f", percentage) + "%");
             });
         }
         return fundSession;
